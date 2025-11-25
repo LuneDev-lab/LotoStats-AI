@@ -1,4 +1,4 @@
-import { LotteryGame } from './types';
+import { LotteryGame } from './types.ts';
 
 export const LOTTERY_GAMES: LotteryGame[] = [
   {

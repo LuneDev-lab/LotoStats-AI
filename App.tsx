@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import Header from './components/Header';
-import Footer from './components/Footer';
-import GameCard from './components/GameCard';
-import ConfigPanel from './components/ConfigPanel';
-import ResultsDisplay from './components/ResultsDisplay';
-import { LOTTERY_GAMES } from './constants';
-import { LotteryGame, GeneratedResult, LoadingState } from './types';
-import { generateLotteryNumbers } from './services/geminiService';
+import Header from './components/Header.tsx';
+import Footer from './components/Footer.tsx';
+import GameCard from './components/GameCard.tsx';
+import ConfigPanel from './components/ConfigPanel.tsx';
+import ResultsDisplay from './components/ResultsDisplay.tsx';
+import { LOTTERY_GAMES } from './constants.ts';
+import { LotteryGame, GeneratedResult, LoadingState } from './types.ts';
+import { generateLotteryNumbers } from './services/geminiService.ts';
 import { Dna } from 'lucide-react';
 
 function App() {
@@ -43,7 +43,7 @@ function App() {
 
     } catch (err) {
       console.error(err);
-      setError("Ocorreu um erro ao conectar com a IA. Por favor, verifique sua conexão e tente novamente.");
+      setError("Ocorreu um erro ao conectar com a IA. Por favor, verifique se a chave de API está configurada corretamente.");
       setLoadingState(LoadingState.ERROR);
     }
   };

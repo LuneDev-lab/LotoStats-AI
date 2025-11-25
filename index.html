@@ -6,6 +6,7 @@
     <title>Gerador de Números Lotéricos</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <style>
       body {
         font-family: 'Inter', sans-serif;
@@ -36,9 +37,18 @@
   }
 }
 </script>
+<script>
+  // Polyfill para evitar crash ao acessar process.env
+  window.process = {
+    env: {
+      // O API KEY deve ser configurado no ambiente de build ou injetado aqui se seguro
+      // Para GitHub Pages público, isso ficará undefined e a UI mostrará o erro apropriado
+    }
+  };
+</script>
 </head>
   <body class="bg-slate-50 text-slate-900 antialiased">
     <div id="root"></div>
-    <script type="module" src="./index.tsx"></script>
+    <script type="text/babel" data-type="module" data-presets="react,typescript" src="./index.tsx"></script>
   </body>
 </html>

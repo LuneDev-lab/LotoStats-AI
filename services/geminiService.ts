@@ -1,12 +1,13 @@
 import { GoogleGenAI, Type } from "@google/genai";
-import { GeneratedResult } from "../types";
+import { GeneratedResult } from "../types.ts";
 
 export const generateLotteryNumbers = async (
   gameName: string,
   quantity: number
 ): Promise<GeneratedResult> => {
+  // Verificação segura do API Key
   if (!process.env.API_KEY) {
-    throw new Error("API Key is missing");
+    throw new Error("API Key is missing. Configure a chave de API no ambiente.");
   }
 
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });

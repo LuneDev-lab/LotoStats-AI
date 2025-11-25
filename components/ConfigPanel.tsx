@@ -1,5 +1,5 @@
 import React from 'react';
-import { LotteryGame, LoadingState } from '../types';
+import { LotteryGame, LoadingState } from '../types.ts';
 import { Wand2, Loader2 } from 'lucide-react';
 
 interface ConfigPanelProps {

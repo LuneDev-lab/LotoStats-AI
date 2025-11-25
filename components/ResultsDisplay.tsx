@@ -1,5 +1,5 @@
 import React from 'react';
-import { GeneratedResult, LotteryGame } from '../types';
+import { GeneratedResult, LotteryGame } from '../types.ts';
 import { TrendingUp, TrendingDown, Info } from 'lucide-react';
 
 interface ResultsDisplayProps {

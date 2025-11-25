@@ -1,5 +1,5 @@
 import React from 'react';
-import { LotteryGame } from '../types';
+import { LotteryGame } from '../types.ts';
 import { CheckCircle2 } from 'lucide-react';
 
 interface GameCardProps {
