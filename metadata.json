@@ -1,0 +1,5 @@
+{
+  "name": "LotoStats AI",
+  "description": "Gerador de números lotéricos brasileiros baseado em estatísticas históricas utilizando IA.",
+  "requestFramePermissions": []
+}
