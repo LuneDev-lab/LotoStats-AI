@@ -11,7 +11,6 @@ import {
   Info, 
   AlertTriangle, 
   Dna,
-  Key,
   X
 } from 'lucide-react';
 
@@ -208,7 +207,7 @@ const generateLotteryNumbers = async (
 
 // --- COMPONENTS ---
 
-const Header: React.FC<{ onOpenKeySettings: () => void }> = ({ onOpenKeySettings }) => {
+const Header: React.FC = () => {
   return (
     <header className="bg-emerald-900 text-white shadow-lg sticky top-0 z-50">
       <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
@@ -219,13 +218,6 @@ const Header: React.FC<{ onOpenKeySettings: () => void }> = ({ onOpenKeySettings
             <p className="text-xs text-emerald-300">Inteligência Artificial & Estatística</p>
           </div>
         </div>
-        <button 
-          onClick={onOpenKeySettings}
-          className="text-emerald-200 hover:text-white p-2 rounded-full hover:bg-emerald-800 transition-colors"
-          title="Configurar API Key"
-        >
-          <Key className="w-5 h-5" />
-        </button>
       </div>
     </header>
   );
@@ -461,57 +453,7 @@ const Footer: React.FC = () => {
   );
 };
 
-const KeyModal: React.FC<{ 
-  isOpen: boolean; 
-  onClose: () => void;
-  apiKey: string;
-  setApiKey: (key: string) => void;
-  onSave: () => void;
-}> = ({ isOpen, onClose, apiKey, setApiKey, onSave }) => {
-  if (!isOpen) return null;
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-      <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6">
-        <div className="flex justify-between items-center mb-4">
-          <h3 className="text-xl font-bold text-slate-800">Configuração de API</h3>
-          <button onClick={onClose} className="text-slate-400 hover:text-slate-600">
-            <X className="w-6 h-6" />
-          </button>
-        </div>
-        <p className="text-slate-600 mb-4 text-sm">
-          Para utilizar a Inteligência Artificial, você precisa fornecer uma chave de API do Google Gemini (Gratuita).
-        </p>
-        <div className="mb-4">
-          <label className="block text-sm font-semibold text-slate-700 mb-2">Google Gemini API Key</label>
-          <input 
-            type="password" 
-            value={apiKey}
-            onChange={(e) => setApiKey(e.target.value)}
-            placeholder="Cole sua chave aqui..."
-            className="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none"
-          />
-        </div>
-        <div className="flex gap-3">
-          <a 
-            href="https://aistudio.google.com/app/apikey" 
-            target="_blank" 
-            rel="noopener noreferrer"
-            className="flex-1 py-3 text-center text-emerald-600 font-semibold text-sm hover:underline"
-          >
-            Obter Chave Grátis
-          </a>
-          <button 
-            onClick={onSave}
-            className="flex-1 bg-emerald-600 text-white font-bold py-3 rounded-xl hover:bg-emerald-700 transition-colors"
-          >
-            Salvar
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-};
 
 // --- APP ---
 
@@ -524,7 +466,6 @@ function App() {
   
   // API Key handling
   const [apiKey, setApiKey] = useState<string>('');
-  const [isKeyModalOpen, setIsKeyModalOpen] = useState(false);
 
   useEffect(() => {
     // Primeiro tenta obter do ambiente (arquivo .env)
@@ -539,11 +480,6 @@ function App() {
     if (storedKey) setApiKey(storedKey);
   }, []);
 
-  const saveKey = () => {
-    localStorage.setItem('GEMINI_API_KEY', apiKey);
-    setIsKeyModalOpen(false);
-  };
-
   // Reset count when game changes
   useEffect(() => {
     setNumCount(selectedGame.minPicks);
@@ -554,7 +490,8 @@ function App() {
 
   const handleGenerate = async () => {
     if (!apiKey) {
-      setIsKeyModalOpen(true);
+      setError("API Key não encontrada. Verifique a configuração do ambiente.");
+      setLoadingState(LoadingState.ERROR);
       return;
     }
 
@@ -578,7 +515,6 @@ function App() {
       const msg = err.message || '';
       if (msg.includes('API Key') || msg.includes('403') || msg.includes('401')) {
          setError("Erro de autenticação. Verifique sua chave de API.");
-         setIsKeyModalOpen(true);
       } else {
          setError("Ocorreu um erro ao conectar com a IA. Tente novamente em instantes.");
       }
@@ -588,7 +524,7 @@ function App() {
 
   return (
     <div className="min-h-screen flex flex-col font-sans">
-      <Header onOpenKeySettings={() => setIsKeyModalOpen(true)} />
+      <Header />
 
       <main className="flex-grow w-full max-w-6xl mx-auto px-4 py-8 md:py-12 space-y-12">
         
@@ -658,14 +594,6 @@ function App() {
       </main>
 
       <Footer />
-      
-      <KeyModal 
-        isOpen={isKeyModalOpen} 
-        onClose={() => setIsKeyModalOpen(false)}
-        apiKey={apiKey}
-        setApiKey={setApiKey}
-        onSave={saveKey}
-      />
     </div>
   );
 }
