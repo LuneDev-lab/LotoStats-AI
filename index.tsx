@@ -527,6 +527,14 @@ function App() {
   const [isKeyModalOpen, setIsKeyModalOpen] = useState(false);
 
   useEffect(() => {
+    // Primeiro tenta obter do ambiente (arquivo .env)
+    const envKey = process.env.API_KEY || process.env.GEMINI_API_KEY;
+    if (envKey) {
+      setApiKey(envKey);
+      return;
+    }
+    
+    // Se não houver no ambiente, tenta obter do localStorage
     const storedKey = localStorage.getItem('GEMINI_API_KEY');
     if (storedKey) setApiKey(storedKey);
   }, []);
