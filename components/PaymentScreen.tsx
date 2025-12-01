@@ -1,16 +1,24 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { initMercadoPago, Wallet } from '@mercadopago/sdk-react';
-import { Clover, CreditCard, Shield, Check } from 'lucide-react';
+import { Clover, CreditCard, Shield, Check, AlertCircle } from 'lucide-react';
 
 interface PaymentScreenProps {
   onPaymentSuccess: () => void;
 }
 
 const PaymentScreen: React.FC<PaymentScreenProps> = ({ onPaymentSuccess }) => {
+  const [paymentError, setPaymentError] = useState<string | null>(null);
+
   useEffect(() => {
     // Initialize Mercado Pago SDK with placeholder Public Key
+    // TODO: Replace with actual public key from environment variable (e.g., process.env.MERCADO_PAGO_PUBLIC_KEY)
     initMercadoPago('TEST-xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx');
   }, []);
+
+  const handlePaymentError = (error: unknown) => {
+    console.error('Mercado Pago error:', error);
+    setPaymentError('Não foi possível carregar o pagamento. Use o botão de demonstração abaixo.');
+  };
 
   return (
     <div className="min-h-screen flex flex-col font-sans bg-gradient-to-br from-slate-100 to-slate-200">
@@ -74,9 +82,15 @@ const PaymentScreen: React.FC<PaymentScreenProps> = ({ onPaymentSuccess }) => {
 
               {/* Mercado Pago Wallet */}
               <div className="mb-4">
+                {paymentError && (
+                  <div className="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-lg flex items-center gap-2 text-amber-700 text-sm">
+                    <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                    <span>{paymentError}</span>
+                  </div>
+                )}
                 <Wallet
                   initialization={{ preferenceId: 'PREFERENCE_ID_PLACEHOLDER' }}
-                  onError={(error) => console.error('Mercado Pago error:', error)}
+                  onError={handlePaymentError}
                 />
               </div>
 

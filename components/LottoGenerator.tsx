@@ -60,7 +60,9 @@ function LottoGenerator() {
             Escolha seus números com base em <span className="text-emerald-600">estatísticas reais</span>
           </h2>
           <p className="text-slate-600 text-lg leading-relaxed">
-            Este gerador utiliza análise estatística de sorteios passados para sugerir números com maior frequência de ocorrência. Embora nenhum sistema garanta ganhos, este é um método baseado em dados. Selecione a loteria desejada e comece!
+            Este gerador utiliza análise estatística de sorteios passados para sugerir números com maior frequência. 
+            Nenhum sistema garante ganhos, mas este método é baseado em dados. 
+            Selecione a loteria desejada e comece!
           </p>
         </section>
 
