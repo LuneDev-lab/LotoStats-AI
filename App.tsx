@@ -4,17 +4,56 @@ import Footer from './components/Footer.tsx';
 import GameCard from './components/GameCard.tsx';
 import ConfigPanel from './components/ConfigPanel.tsx';
 import ResultsDisplay from './components/ResultsDisplay.tsx';
+import LandingPage from './components/LandingPage.tsx';
+import AuthScreen from './components/AuthScreen.tsx';
+import PaymentScreen from './components/PaymentScreen.tsx';
 import { LOTTERY_GAMES } from './constants.ts';
-import { LotteryGame, GeneratedResult, LoadingState } from './types.ts';
+import { LotteryGame, GeneratedResult, LoadingState, AppView, User } from './types.ts';
 import { generateLotteryNumbers } from './services/geminiService.ts';
 import { Dna } from 'lucide-react';
 
+// Keys for localStorage persistence
+const STORAGE_KEYS = {
+  USER: 'lotostats_user',
+  HAS_PAID: 'lotostats_has_paid'
+};
+
 function App() {
+  // Flow state management
+  const [currentView, setCurrentView] = useState<AppView>(AppView.LANDING);
+  const [user, setUser] = useState<User | null>(null);
+  const [hasPaid, setHasPaid] = useState<boolean>(false);
+
+  // Main app state
   const [selectedGame, setSelectedGame] = useState<LotteryGame>(LOTTERY_GAMES[0]);
   const [numCount, setNumCount] = useState<number>(LOTTERY_GAMES[0].minPicks);
   const [result, setResult] = useState<GeneratedResult | null>(null);
   const [loadingState, setLoadingState] = useState<LoadingState>(LoadingState.IDLE);
   const [error, setError] = useState<string | null>(null);
+
+  // Load persisted state on mount
+  useEffect(() => {
+    const storedUser = localStorage.getItem(STORAGE_KEYS.USER);
+    const storedHasPaid = localStorage.getItem(STORAGE_KEYS.HAS_PAID);
+
+    if (storedUser) {
+      try {
+        const parsedUser = JSON.parse(storedUser) as User;
+        setUser(parsedUser);
+        
+        if (storedHasPaid === 'true') {
+          setHasPaid(true);
+          setCurrentView(AppView.APP);
+        } else {
+          setCurrentView(AppView.PAYMENT);
+        }
+      } catch {
+        // Invalid stored data, stay on landing
+        localStorage.removeItem(STORAGE_KEYS.USER);
+        localStorage.removeItem(STORAGE_KEYS.HAS_PAID);
+      }
+    }
+  }, []);
 
   // Reset count when game changes
   useEffect(() => {
@@ -23,6 +62,56 @@ function App() {
     setError(null);
     setLoadingState(LoadingState.IDLE);
   }, [selectedGame]);
+
+  // Flow handlers
+  const handleGetStarted = () => {
+    setCurrentView(AppView.AUTH);
+  };
+
+  const handleAuthSuccess = (authenticatedUser: { email: string; name: string }) => {
+    const newUser: User = {
+      email: authenticatedUser.email,
+      name: authenticatedUser.name
+    };
+    setUser(newUser);
+    localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(newUser));
+    
+    // Check if user already paid (could be returning user)
+    const storedHasPaid = localStorage.getItem(STORAGE_KEYS.HAS_PAID);
+    if (storedHasPaid === 'true') {
+      setHasPaid(true);
+      setCurrentView(AppView.APP);
+    } else {
+      setCurrentView(AppView.PAYMENT);
+    }
+  };
+
+  const handlePaymentSuccess = () => {
+    setHasPaid(true);
+    localStorage.setItem(STORAGE_KEYS.HAS_PAID, 'true');
+    setCurrentView(AppView.APP);
+  };
+
+  const handleLogout = () => {
+    setUser(null);
+    setHasPaid(false);
+    localStorage.removeItem(STORAGE_KEYS.USER);
+    localStorage.removeItem(STORAGE_KEYS.HAS_PAID);
+    setCurrentView(AppView.LANDING);
+    // Reset app state
+    setResult(null);
+    setError(null);
+    setLoadingState(LoadingState.IDLE);
+    setSelectedGame(LOTTERY_GAMES[0]);
+  };
+
+  const handleBackToLanding = () => {
+    setCurrentView(AppView.LANDING);
+  };
+
+  const handleBackToAuth = () => {
+    setCurrentView(AppView.AUTH);
+  };
 
   const handleGenerate = async () => {
     setLoadingState(LoadingState.LOADING);
@@ -48,9 +137,35 @@ function App() {
     }
   };
 
+  // Render based on current view
+  if (currentView === AppView.LANDING) {
+    return <LandingPage onGetStarted={handleGetStarted} />;
+  }
+
+  if (currentView === AppView.AUTH) {
+    return (
+      <AuthScreen 
+        onBack={handleBackToLanding} 
+        onAuthSuccess={handleAuthSuccess} 
+      />
+    );
+  }
+
+  if (currentView === AppView.PAYMENT && user) {
+    return (
+      <PaymentScreen 
+        user={user}
+        onBack={handleBackToAuth}
+        onPaymentSuccess={handlePaymentSuccess}
+        onLogout={handleLogout}
+      />
+    );
+  }
+
+  // Main App View (only accessible after payment)
   return (
     <div className="min-h-screen flex flex-col font-sans">
-      <Header />
+      <Header user={user} onLogout={handleLogout} />
 
       <main className="flex-grow w-full max-w-6xl mx-auto px-4 py-8 md:py-12 space-y-12">
         

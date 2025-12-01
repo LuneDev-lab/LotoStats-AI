@@ -23,3 +23,17 @@ export enum LoadingState {
   SUCCESS = 'SUCCESS',
   ERROR = 'ERROR'
 }
+
+// App flow view states
+export enum AppView {
+  LANDING = 'landing',
+  AUTH = 'auth',
+  PAYMENT = 'payment',
+  APP = 'app'
+}
+
+// User type for authentication
+export interface User {
+  email: string;
+  name: string;
+}
