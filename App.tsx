@@ -1,127 +1,120 @@
 import React, { useState, useEffect } from 'react';
-import Header from './components/Header.tsx';
-import Footer from './components/Footer.tsx';
-import GameCard from './components/GameCard.tsx';
-import ConfigPanel from './components/ConfigPanel.tsx';
-import ResultsDisplay from './components/ResultsDisplay.tsx';
-import { LOTTERY_GAMES } from './constants.ts';
-import { LotteryGame, GeneratedResult, LoadingState } from './types.ts';
-import { generateLotteryNumbers } from './services/geminiService.ts';
-import { Dna } from 'lucide-react';
+import LandingPage from './components/LandingPage.tsx';
+import AuthScreen from './components/AuthScreen.tsx';
+import PaymentScreen from './components/PaymentScreen.tsx';
+import LottoGenerator from './components/LottoGenerator.tsx';
+
+// User type for localStorage persistence
+interface User {
+  email: string;
+  name: string;
+}
+
+// App flow states
+type AppState = 'landing' | 'auth' | 'payment' | 'generator';
+
+/**
+ * App Flow:
+ * 1. Landing Page - Marketing summary, CTA to proceed
+ * 2. Auth Screen - Login/Registration (mocked, stored in localStorage)
+ * 3. Payment Screen - Mercado Pago checkout (R$ 9,90)
+ * 4. Lotto Generator - Main app functionality (unlocked after payment)
+ * 
+ * TODO: In production, user and payment status should be verified against
+ * a real backend database, not localStorage.
+ */
 
 function App() {
-  const [selectedGame, setSelectedGame] = useState<LotteryGame>(LOTTERY_GAMES[0]);
-  const [numCount, setNumCount] = useState<number>(LOTTERY_GAMES[0].minPicks);
-  const [result, setResult] = useState<GeneratedResult | null>(null);
-  const [loadingState, setLoadingState] = useState<LoadingState>(LoadingState.IDLE);
-  const [error, setError] = useState<string | null>(null);
+  const [appState, setAppState] = useState<AppState>('landing');
+  const [user, setUser] = useState<User | null>(null);
+  const [hasPaid, setHasPaid] = useState(false);
 
-  // Reset count when game changes
+  // Check localStorage for existing session on mount
   useEffect(() => {
-    setNumCount(selectedGame.minPicks);
-    setResult(null);
-    setError(null);
-    setLoadingState(LoadingState.IDLE);
-  }, [selectedGame]);
+    // TODO: Replace localStorage checks with real backend API calls
+    // to verify user session and payment status
+    const storedUser = localStorage.getItem('lotostats_user');
+    const storedHasPaid = localStorage.getItem('lotostats_hasPaid');
 
-  const handleGenerate = async () => {
-    setLoadingState(LoadingState.LOADING);
-    setError(null);
-    
-    try {
-      const data = await generateLotteryNumbers(selectedGame.name, numCount);
-      setResult(data);
-      setLoadingState(LoadingState.SUCCESS);
+    if (storedUser) {
+      const parsedUser = JSON.parse(storedUser);
+      setUser(parsedUser);
       
-      // Smooth scroll to results
-      setTimeout(() => {
-        const resultElement = document.getElementById('results-section');
-        if (resultElement) {
-          resultElement.scrollIntoView({ behavior: 'smooth' });
-        }
-      }, 100);
+      if (storedHasPaid === 'true') {
+        setHasPaid(true);
+        setAppState('generator');
+      } else {
+        setAppState('payment');
+      }
+    }
+  }, []);
 
-    } catch (err) {
-      console.error(err);
-      setError("Ocorreu um erro ao conectar com a IA. Por favor, verifique se a chave de API está configurada corretamente.");
-      setLoadingState(LoadingState.ERROR);
+  // Handle proceeding from landing page to auth
+  const handleProceedToAuth = () => {
+    setAppState('auth');
+  };
+
+  // Handle user login/registration
+  const handleLogin = (loggedInUser: User) => {
+    setUser(loggedInUser);
+    // TODO: Check payment status from backend database
+    const storedHasPaid = localStorage.getItem('lotostats_hasPaid');
+    if (storedHasPaid === 'true') {
+      setHasPaid(true);
+      setAppState('generator');
+    } else {
+      setAppState('payment');
     }
   };
 
-  return (
-    <div className="min-h-screen flex flex-col font-sans">
-      <Header />
+  // Handle successful payment
+  const handlePaymentSuccess = () => {
+    // TODO: This should be triggered by a webhook from Mercado Pago
+    // The webhook should update the user's hasPaid status in your database
+    // Frontend should then fetch/verify this status from your backend
+    setHasPaid(true);
+    setAppState('generator');
+  };
 
-      <main className="flex-grow w-full max-w-6xl mx-auto px-4 py-8 md:py-12 space-y-12">
-        
-        {/* Intro */}
-        <section className="text-center max-w-3xl mx-auto space-y-4">
-          <h2 className="text-3xl md:text-4xl font-bold text-slate-900 leading-tight">
-            Escolha seus números com base em <span className="text-emerald-600">estatísticas reais</span>
-          </h2>
-          <p className="text-slate-600 text-lg leading-relaxed">
-            Este gerador utiliza análise estatística de sorteios passados para sugerir números com maior frequência de ocorrência. Embora nenhum sistema garanta ganhos, este é um método baseado em dados. Selecione a loteria desejada e comece!
-          </p>
-        </section>
+  // Handle logout
+  const handleLogout = () => {
+    // Clear localStorage
+    localStorage.removeItem('lotostats_user');
+    localStorage.removeItem('lotostats_hasPaid');
+    // Reset state
+    setUser(null);
+    setHasPaid(false);
+    setAppState('landing');
+  };
 
-        {/* Game Selector */}
-        <section>
-           <h3 className="text-xl font-bold text-slate-800 mb-6 flex items-center gap-2">
-            <span className="bg-slate-800 text-white w-6 h-6 rounded-full flex items-center justify-center text-sm">1</span>
-            Escolha seu Jogo
-          </h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-            {LOTTERY_GAMES.map((game) => (
-              <GameCard 
-                key={game.id} 
-                game={game} 
-                isSelected={selectedGame.id === game.id}
-                onSelect={setSelectedGame}
-              />
-            ))}
-          </div>
-        </section>
-
-        {/* Config */}
-        <ConfigPanel 
-          game={selectedGame}
-          numCount={numCount}
-          setNumCount={setNumCount}
-          onGenerate={handleGenerate}
-          loadingState={loadingState}
+  // Render based on current app state
+  switch (appState) {
+    case 'landing':
+      return <LandingPage onProceed={handleProceedToAuth} />;
+    
+    case 'auth':
+      return <AuthScreen onLogin={handleLogin} />;
+    
+    case 'payment':
+      if (!user) {
+        // Safety check - shouldn't happen
+        setAppState('auth');
+        return null;
+      }
+      return (
+        <PaymentScreen 
+          user={user}
+          onPaymentSuccess={handlePaymentSuccess}
+          onLogout={handleLogout}
         />
-
-        {/* Error Message */}
-        {loadingState === LoadingState.ERROR && (
-          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded relative text-center">
-            {error}
-          </div>
-        )}
-
-        {/* Results */}
-        {(loadingState === LoadingState.SUCCESS && result) && (
-          <section id="results-section">
-             <h3 className="text-xl font-bold text-slate-800 mb-6 flex items-center gap-2">
-              <span className="bg-emerald-600 text-white w-6 h-6 rounded-full flex items-center justify-center text-sm">2</span>
-              Análise e Resultados
-            </h3>
-            <ResultsDisplay result={result} game={selectedGame} />
-          </section>
-        )}
-        
-        {/* Placeholder if no result yet */}
-        {loadingState === LoadingState.IDLE && (
-          <div className="flex flex-col items-center justify-center py-12 text-slate-300">
-            <Dna className="w-16 h-16 mb-4 opacity-50" />
-            <p>Selecione um jogo e gere sua combinação</p>
-          </div>
-        )}
-
-      </main>
-
-      <Footer />
-    </div>
-  );
+      );
+    
+    case 'generator':
+      return <LottoGenerator onLogout={handleLogout} />;
+    
+    default:
+      return <LandingPage onProceed={handleProceedToAuth} />;
+  }
 }
 
 export default App;
