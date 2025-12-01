@@ -2,9 +2,21 @@ import React from 'react';
 import { Clover, CheckCircle, CreditCard, ArrowLeft } from 'lucide-react';
 import { initMercadoPago, Wallet } from '@mercadopago/sdk-react';
 
-// Initialize Mercado Pago with public key
-// NOTE: Replace 'YOUR_PUBLIC_KEY' with your actual Mercado Pago public key
-initMercadoPago('YOUR_PUBLIC_KEY', { locale: 'pt-BR' });
+/*
+ * IMPORTANT: Mercado Pago Configuration
+ * --------------------------------------
+ * Replace 'YOUR_PUBLIC_KEY' with your actual Mercado Pago public key.
+ * In production, this should come from environment variables:
+ *   - Set VITE_MP_PUBLIC_KEY in your .env file
+ *   - Or configure it in your deployment environment
+ * 
+ * To get your public key:
+ *   1. Go to https://www.mercadopago.com.br/developers
+ *   2. Navigate to Your integrations > Application credentials
+ *   3. Copy your Public Key (not the Access Token)
+ */
+const MP_PUBLIC_KEY = import.meta.env.VITE_MP_PUBLIC_KEY || 'YOUR_PUBLIC_KEY';
+initMercadoPago(MP_PUBLIC_KEY, { locale: 'pt-BR' });
 
 interface PaymentScreenProps {
   onPaymentComplete: () => void;
