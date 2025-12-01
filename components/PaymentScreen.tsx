@@ -9,9 +9,10 @@ interface PaymentScreenProps {
   onLogout: () => void;
 }
 
-// NOTE: Replace with your actual Mercado Pago PUBLIC_KEY
-// This is a test/demo key placeholder - you need to set up your own Mercado Pago account
-const MERCADO_PAGO_PUBLIC_KEY = 'TEST-00000000-0000-0000-0000-000000000000';
+// NOTE: The PUBLIC_KEY should be configured via environment variables in production.
+// This placeholder demonstrates where the key should be used.
+// In production, set VITE_MERCADO_PAGO_PUBLIC_KEY in your environment.
+const MERCADO_PAGO_PUBLIC_KEY = import.meta.env.VITE_MERCADO_PAGO_PUBLIC_KEY || 'TEST-PLACEHOLDER-KEY';
 
 const PaymentScreen: React.FC<PaymentScreenProps> = ({ user, onBack, onPaymentSuccess, onLogout }) => {
   const [preferenceId, setPreferenceId] = useState<string | null>(null);
@@ -89,7 +90,7 @@ const PaymentScreen: React.FC<PaymentScreenProps> = ({ user, onBack, onPaymentSu
         // MOCK: In demo mode, we'll use a placeholder preference ID
         // This will show the Wallet component but won't actually process payments
         // Replace this with real backend integration for production
-        const mockPreferenceId = 'demo-preference-' + Date.now();
+        const mockPreferenceId = 'demo-preference-' + crypto.randomUUID();
         setPreferenceId(mockPreferenceId);
 
       } catch (err) {

@@ -34,7 +34,7 @@ const AuthScreen: React.FC<AuthScreenProps> = ({ onBack, onAuthSuccess }) => {
       return;
     }
 
-    // Email validation
+    // Email validation - supplementary check alongside HTML5 type="email" validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       setError('Por favor, informe um e-mail válido.');

@@ -151,7 +151,7 @@ function App() {
     );
   }
 
-  if (currentView === AppView.PAYMENT && user) {
+  if (currentView === AppView.PAYMENT && user && !hasPaid) {
     return (
       <PaymentScreen 
         user={user}
