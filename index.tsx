@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import AuthGate from './components/AuthGate';
 import ReactDOM from 'react-dom/client';
 import { GoogleGenAI } from "@google/genai";
 import { 
@@ -601,6 +602,6 @@ function App() {
 const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);
 root.render(
   <React.StrictMode>
-    <App />
+    <AuthGate />
   </React.StrictMode>
 );
