@@ -4,12 +4,14 @@ import Footer from './components/Footer.tsx';
 import GameCard from './components/GameCard.tsx';
 import ConfigPanel from './components/ConfigPanel.tsx';
 import ResultsDisplay from './components/ResultsDisplay.tsx';
+import Login from './components/Login.tsx';
 import { LOTTERY_GAMES } from './constants.ts';
 import { LotteryGame, GeneratedResult, LoadingState } from './types.ts';
 import { generateLotteryNumbers } from './services/geminiService.ts';
 import { Dna } from 'lucide-react';
 
 function App() {
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
   const [selectedGame, setSelectedGame] = useState<LotteryGame>(LOTTERY_GAMES[0]);
   const [numCount, setNumCount] = useState<number>(LOTTERY_GAMES[0].minPicks);
   const [result, setResult] = useState<GeneratedResult | null>(null);
@@ -23,6 +25,20 @@ function App() {
     setError(null);
     setLoadingState(LoadingState.IDLE);
   }, [selectedGame]);
+
+  useEffect(() => {
+    const token = localStorage.getItem('auth_token');
+    setIsLoggedIn(!!token);
+  }, []);
+
+  const handleLogin = () => {
+    setIsLoggedIn(true);
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('auth_token');
+    setIsLoggedIn(false);
+  };
 
   const handleGenerate = async () => {
     setLoadingState(LoadingState.LOADING);
@@ -48,9 +64,13 @@ function App() {
     }
   };
 
+  if (!isLoggedIn) {
+    return <Login onLogin={handleLogin} />;
+  }
+
   return (
     <div className="min-h-screen flex flex-col font-sans">
-      <Header />
+      <Header isLoggedIn={isLoggedIn} onLogout={handleLogout} />
 
       <main className="flex-grow w-full max-w-6xl mx-auto px-4 py-8 md:py-12 space-y-12">
         
