@@ -11,7 +11,9 @@ import { generateLotteryNumbers } from './services/geminiService.ts';
 import { Dna } from 'lucide-react';
 
 function App() {
-  const REQUIRE_LOGIN = import.meta.env.VITE_REQUIRE_LOGIN === 'true';
+  const searchParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
+  const FORCE_LOGIN_PARAM = searchParams?.get('login') === 'true';
+  const REQUIRE_LOGIN = FORCE_LOGIN_PARAM || import.meta.env.VITE_REQUIRE_LOGIN === 'true';
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
   const [selectedGame, setSelectedGame] = useState<LotteryGame>(LOTTERY_GAMES[0]);
   const [numCount, setNumCount] = useState<number>(LOTTERY_GAMES[0].minPicks);
