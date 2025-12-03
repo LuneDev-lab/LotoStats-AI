@@ -11,6 +11,7 @@ import { generateLotteryNumbers } from './services/geminiService.ts';
 import { Dna } from 'lucide-react';
 
 function App() {
+  const REQUIRE_LOGIN = import.meta.env.VITE_REQUIRE_LOGIN === 'true';
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
   const [selectedGame, setSelectedGame] = useState<LotteryGame>(LOTTERY_GAMES[0]);
   const [numCount, setNumCount] = useState<number>(LOTTERY_GAMES[0].minPicks);
@@ -64,13 +65,13 @@ function App() {
     }
   };
 
-  if (!isLoggedIn) {
+  if (REQUIRE_LOGIN && !isLoggedIn) {
     return <Login onLogin={handleLogin} />;
   }
 
   return (
     <div className="min-h-screen flex flex-col font-sans">
-      <Header isLoggedIn={isLoggedIn} onLogout={handleLogout} />
+      <Header isLoggedIn={REQUIRE_LOGIN ? isLoggedIn : false} onLogout={REQUIRE_LOGIN ? handleLogout : undefined} />
 
       <main className="flex-grow w-full max-w-6xl mx-auto px-4 py-8 md:py-12 space-y-12">
         
