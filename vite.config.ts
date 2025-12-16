@@ -5,8 +5,8 @@ import react from '@vitejs/plugin-react';
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, '.', '');
   return {
-    // Base path para GitHub Pages (use '/' para outros deploys)
-    base: '/LotoStats-AI/',
+    // Base path for deployment
+    base: '/',
     server: {
       port: 3000,
       host: '0.0.0.0',
